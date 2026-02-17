@@ -261,6 +261,8 @@
             transition: all 0.3s ease;
             min-width: 42px;
             text-align: center;
+            touch-action: manipulation; /* убирает 300мс задержку на мобиле */
+            user-select: none;
         }
 
         .pagination-btn:hover:not(:disabled) {
@@ -694,7 +696,7 @@
                     currentPage = targetPage;
                     renderCards();
                     renderPagination();
-                    setTimeout(function() { isNavigating = false; }, 500);
+                    setTimeout(function() { isNavigating = false; }, 600);
                 });
             }
             return btn;
@@ -972,9 +974,14 @@
 
         document.getElementById('quizNextBtn').addEventListener('click', nextQuestion);
 
-        // Обновление пагинации при изменении размера экрана
+        // Обновление пагинации при изменении ШИРИНЫ экрана.
+        // Высота меняется при скролле на мобиле (прячется адресная строка) — игнорируем.
+        let lastWidth = window.innerWidth;
         let resizeTimer;
         window.addEventListener('resize', () => {
+            const newWidth = window.innerWidth;
+            if (newWidth === lastWidth) return; // только ширина
+            lastWidth = newWidth;
             clearTimeout(resizeTimer);
             resizeTimer = setTimeout(() => {
                 currentPage = 1;
