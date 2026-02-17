@@ -511,7 +511,6 @@
             </div>
 
             <div class="pagination-info" id="paginationInfo"></div>
-            <div class="pagination" id="paginationTop"></div>
 
             <div class="cards-grid" id="cardsGrid"></div>
 
@@ -555,7 +554,7 @@
     <script>
         const names = [
   { num: 1, name: "Ар-Рахмаану", translation: "Милостивый", desc: "Тот, Кто описан милосердием ко всем Своим творениям, даровав им пропитание и владение на земле" },
-  { num: 2, name: "Ар-Рахييму", translation: "Милосердный", desc: "Тот, Кто описан состраданием к верующим в обоих мирах и окажет им почет в вечности" },
+  { num: 2, name: "Ар-Рахиму", translation: "Милосердный", desc: "Тот, Кто описан состраданием к верующим в обоих мирах и окажет им почет в вечности" },
   { num: 3, name: "Аль-Малику", translation: "Владыка", desc: "Тот, в Чьем владении абсолютно все, Кто управляет творениями как пожелает и ни от кого не зависит" },
   { num: 4, name: "Аль-Къуддуусу", translation: "Святой", desc: "Священный и Единственный в Своем совершенстве, лишенный любого недостатка, изъяна и подобия" },
   { num: 5, name: "Ас-Саляму", translation: "Пречистый", desc: "Пречистый от любых пороков и несправедливости, Дарующий мир и благополучие" },
@@ -640,7 +639,7 @@
   { num: 84, name: "Аль-Му'тыы", translation: "Одаряющий", desc: "Тот, Кто наделяет рабов верой, знанием религии и всеми духовными благами" },
   { num: 85, name: "Аль-Мукъыыту", translation: "Дарующий пропитание", desc: "Тот, Кто обеспечивает существование всех созданий и наблюдает за ними" },
   { num: 86, name: "Ас-Сейиду", translation: "Господин", desc: "Господин, Чье господство и правление полноценны и лишены любых изъянов" },
-  { num: 87, name: "АТ-ТОЙИБУ", translation: "Благой", desc: "Совершенный во всем Господь, Который принимает от рабов только благие дела и пищу" },
+  { num: 87, name: "Ат-Тойибу", translation: "Благой", desc: "Совершенный во всем Господь, Который принимает от рабов только благие дела и пищу" },
   { num: 88, name: "Аль-Хакаму", translation: "Судья", desc: "Тот, Кто справедливо вершит суд, не допуская несправедливости к Своим рабам" },
   { num: 90, name: "Аль-Акраму", translation: "Щедрейший", desc: "Тот, Чья доброта охватила всё сущее и Чье совершенство не имеет границ" },
   { num: 91, name: "Аль-Барру", translation: "Добродетельный", desc: "Тот, Кто одаряет Свои творения милостями и помогает им быть послушными" },
@@ -683,14 +682,22 @@
 
         let isNavigating = false;
 
-        function addPageHandler(btn, targetPage) {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                if (isNavigating) return;
-                isNavigating = true;
-                goToPage(targetPage);
-                setTimeout(() => { isNavigating = false; }, 400);
-            });
+        function buildPaginatorBtn(label, targetPage, isActive, isDisabled) {
+            const btn = document.createElement('button');
+            btn.className = 'pagination-btn' + (isActive ? ' active' : '');
+            btn.textContent = label;
+            btn.disabled = isDisabled;
+            if (!isDisabled && !isActive) {
+                btn.addEventListener('click', function() {
+                    if (isNavigating) return;
+                    isNavigating = true;
+                    currentPage = targetPage;
+                    renderCards();
+                    renderPagination();
+                    setTimeout(function() { isNavigating = false; }, 500);
+                });
+            }
+            return btn;
         }
 
         function renderPagination() {
@@ -700,48 +707,28 @@
             const endItem = Math.min(currentPage * pageSize, filteredNames.length);
 
             const info = document.getElementById('paginationInfo');
-            if (filteredNames.length > 0) {
-                info.textContent = `Показаны ${startItem}–${endItem} из ${filteredNames.length}`;
-            } else {
-                info.textContent = 'Ничего не найдено';
-            }
+            info.textContent = filteredNames.length > 0
+                ? `Показаны ${startItem}–${endItem} из ${filteredNames.length}`
+                : 'Ничего не найдено';
 
-            ['paginationTop', 'paginationBottom'].forEach(id => {
-                const container = document.getElementById(id);
-                container.innerHTML = '';
+            const container = document.getElementById('paginationBottom');
+            container.innerHTML = '';
+            if (total <= 1) return;
 
-                if (total <= 1) return;
+            container.appendChild(buildPaginatorBtn('←', currentPage - 1, false, currentPage === 1));
 
-                const prevBtn = document.createElement('button');
-                prevBtn.className = 'pagination-btn';
-                prevBtn.textContent = '←';
-                prevBtn.disabled = currentPage === 1;
-                if (currentPage > 1) addPageHandler(prevBtn, currentPage - 1);
-                container.appendChild(prevBtn);
-
-                const pageNumbers = getPageNumbers(currentPage, total);
-                pageNumbers.forEach(p => {
-                    if (p === '…') {
-                        const dots = document.createElement('span');
-                        dots.textContent = '…';
-                        dots.style.cssText = 'padding: 0 4px; color: var(--text-light); line-height: 42px;';
-                        container.appendChild(dots);
-                    } else {
-                        const btn = document.createElement('button');
-                        btn.className = 'pagination-btn' + (p === currentPage ? ' active' : '');
-                        btn.textContent = p;
-                        if (p !== currentPage) addPageHandler(btn, p);
-                        container.appendChild(btn);
-                    }
-                });
-
-                const nextBtn = document.createElement('button');
-                nextBtn.className = 'pagination-btn';
-                nextBtn.textContent = '→';
-                nextBtn.disabled = currentPage === total;
-                if (currentPage < total) addPageHandler(nextBtn, currentPage + 1);
-                container.appendChild(nextBtn);
+            getPageNumbers(currentPage, total).forEach(p => {
+                if (p === '…') {
+                    const dots = document.createElement('span');
+                    dots.textContent = '…';
+                    dots.style.cssText = 'padding: 0 4px; color: var(--text-light); line-height: 42px;';
+                    container.appendChild(dots);
+                } else {
+                    container.appendChild(buildPaginatorBtn(p, p, p === currentPage, false));
+                }
             });
+
+            container.appendChild(buildPaginatorBtn('→', currentPage + 1, false, currentPage === total));
         }
 
         function getPageNumbers(current, total) {
@@ -767,14 +754,7 @@
             return pages;
         }
 
-        function goToPage(page) {
-            const total = getTotalPages();
-            if (page < 1 || page > total) return;
-            currentPage = page;
-            renderCards();
-            renderPagination();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
+        
 
         function createCard(nameData, index) {
             const wrapper = document.createElement('div');
