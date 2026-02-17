@@ -239,6 +239,53 @@
             text-align: center;
         }
 
+        /* Пагинация */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .pagination-btn {
+            padding: 10px 16px;
+            border: 2px solid var(--primary);
+            background: var(--bg-white);
+            color: var(--primary);
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 42px;
+            text-align: center;
+        }
+
+        .pagination-btn:hover:not(:disabled) {
+            background: var(--primary-light);
+            border-color: var(--primary-light);
+            color: white;
+        }
+
+        .pagination-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+
+        .pagination-info {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
         #quizMode {
             display: none;
         }
@@ -402,7 +449,7 @@
         }
 
         .source-info p {
-            font-size: 0.75rem; /* Мелкий шрифт */
+            font-size: 0.75rem;
             color: var(--text-light);
             line-height: 1.5;
             opacity: 0.8;
@@ -427,6 +474,12 @@
 
             .quiz-card {
                 padding: 24px;
+            }
+
+            .pagination-btn {
+                padding: 8px 12px;
+                font-size: 0.85rem;
+                min-width: 36px;
             }
         }
     </style>
@@ -457,7 +510,12 @@
                 <input type="text" class="search-input" id="searchInput" placeholder="Поиск по именам...">
             </div>
 
+            <div class="pagination-info" id="paginationInfo"></div>
+            <div class="pagination" id="paginationTop"></div>
+
             <div class="cards-grid" id="cardsGrid"></div>
+
+            <div class="pagination" id="paginationBottom"></div>
 
             <div class="actions">
                 <button class="reset-btn" id="resetBtn">Сбросить прогресс</button>
@@ -497,13 +555,13 @@
     <script>
         const names = [
   { num: 1, name: "Ар-Рахмаану", translation: "Милостивый", desc: "Тот, Кто описан милосердием ко всем Своим творениям, даровав им пропитание и владение на земле" },
-  { num: 2, name: "Ар-Рахииму", translation: "Милосердный", desc: "Тот, Кто описан состраданием к верующим в обоих мирах и окажет им почет в вечности" },
+  { num: 2, name: "Ар-Рахييму", translation: "Милосердный", desc: "Тот, Кто описан состраданием к верующим в обоих мирах и окажет им почет в вечности" },
   { num: 3, name: "Аль-Малику", translation: "Владыка", desc: "Тот, в Чьем владении абсолютно все, Кто управляет творениями как пожелает и ни от кого не зависит" },
   { num: 4, name: "Аль-Къуддуусу", translation: "Святой", desc: "Священный и Единственный в Своем совершенстве, лишенный любого недостатка, изъяна и подобия" },
   { num: 5, name: "Ас-Саляму", translation: "Пречистый", desc: "Пречистый от любых пороков и несправедливости, Дарующий мир и благополучие" },
-  { num: 6, name: "Аль-Му‘мину", translation: "Оберегающий", desc: "Тот, Кто дарует безопасность, оберегает от незаслуженного наказания и правдив в Своих обещаниях" },
+  { num: 6, name: "Аль-Му'мину", translation: "Оберегающий", desc: "Тот, Кто дарует безопасность, оберегает от незаслуженного наказания и правдив в Своих обещаниях" },
   { num: 7, name: "Аль-Мухеймину", translation: "Хранитель", desc: "Тот, Кто Сведущ о всех деяниях Своих рабов, опекает их и полностью контролирует всё сущее" },
-  { num: 8, name: "Аль-‘Азиизу", translation: "Сильный", desc: "Тот, Кто одерживает победу над всеми, Могущественный, Которому нет равных в славе и мощи" },
+  { num: 8, name: "Аль-'Азиизу", translation: "Сильный", desc: "Тот, Кто одерживает победу над всеми, Могущественный, Которому нет равных в славе и мощи" },
   { num: 9, name: "Аль-Джаббаару", translation: "Могучий", desc: "Тот, Кто Своим могуществом сокрушает тиранов и помогает слабым, заменяя уныние радостью" },
   { num: 10, name: "Аль-Мутакяббиру", translation: "Гордый", desc: "Тот, Кто по причине Своего величия превозносится над злом, пороками и всеми созданиями" },
   { num: 11, name: "Аль-Хааликъу", translation: "Творец", desc: "Тот, Кто сотворил все сущее из небытия по предопределению, придав творениям облик и соразмерность" },
@@ -513,11 +571,11 @@
   { num: 15, name: "Аль-Аахыру", translation: "Последний", desc: "Тот, Кто будет существовать вечно после того, как всё во Вселенной исчезнет" },
   { num: 16, name: "Аз-Зоохиру", translation: "Явный", desc: "Тот, доказательства существования Которого очевидны, Кто возвышается сущностью над всеми созданиями" },
   { num: 17, name: "Аль-Баатыну", translation: "Скрытый", desc: "Тот, Кто скрыт от взоров Своих творений в этом мире, что подчеркивает Его совершенство" },
-  { num: 18, name: "Ас-Самии‘у", translation: "Слышащий", desc: "Тот, Кто объемлет Своим божественным слухом любые звуки, какими бы многочисленными они ни были" },
+  { num: 18, name: "Ас-Самии'у", translation: "Слышащий", desc: "Тот, Кто объемлет Своим божественным слухом любые звуки, какими бы многочисленными они ни были" },
   { num: 19, name: "Аль-Басыыру", translation: "Видящий", desc: "Тот, для Кого не существует невидимого, Кто зрит всё явное и тайное, даже самое мельчайшее" },
   { num: 20, name: "Аль-Мауля", translation: "Покровитель", desc: "Покровитель единобожников, на Которого они полагаются в радости и трудности" },
   { num: 21, name: "Ан-Насыыру", translation: "Помощник", desc: "Тот, Кто оказывает помощь пророкам и Своим рабам против врагов, устраняя несправедливость" },
-  { num: 22, name: "Аль-‘Афувву", translation: "Снисходительный", desc: "Тот, Кто любит прощать грешников и очищать их от недостатков, не давая им отчаяться" },
+  { num: 22, name: "Аль-'Афувву", translation: "Снисходительный", desc: "Тот, Кто любит прощать грешников и очищать их от недостатков, не давая им отчаяться" },
   { num: 23, name: "Аль-Къадииру", translation: "Всемогущий", desc: "Тот, в Чьих руках вся власть и правление, Кто создает бытие из небытия Своей мощью" },
   { num: 24, name: "Аль-Лятыыфу", translation: "Добрый", desc: "Тот, Кто обладает знанием о мельчайших деталях и проявляет мягкость к Своим творениям" },
   { num: 25, name: "Аль-Хабииру", translation: "Ведающий", desc: "Тот, Чье знание объемлет всё сущее: то, что произошло, и то, что еще не случилось" },
@@ -526,7 +584,7 @@
   { num: 28, name: "Аль-Хайийю", translation: "Стыдливый", desc: "Тот, Кто стесняется оставить мольбы рабов без ответа и стыдится наказывать покаявшихся" },
   { num: 29, name: "Ас-Ситтииру", translation: "Покрывающий", desc: "Тот, Кто любит скрывать и прощать грехи Своих рабов, даже если они велики" },
   { num: 30, name: "Аль-Кябииру", translation: "Большой", desc: "Обладатель истинного величия в сущности и делах, превосходящий любое воображение" },
-  { num: 31, name: "Аль-Мута‘аалю", translation: "Превознесшийся", desc: "Тот, Кто выше всех Своих творений силой и знанием, перед Кем преклоняются все рабы" },
+  { num: 31, name: "Аль-Мута'аалю", translation: "Превознесшийся", desc: "Тот, Кто выше всех Своих творений силой и знанием, перед Кем преклоняются все рабы" },
   { num: 32, name: "Аль-Ваахиду", translation: "Единственный", desc: "Тот, у Кого нет равных, подобных или соперников ни в сущности, ни в царствовании" },
   { num: 33, name: "Аль-Къаххаару", translation: "Всепобеждающий", desc: "Тот, в Чьей власти и могуществе находится всё сущее и Кто сокрушает тиранов" },
   { num: 34, name: "Аль-Хаккъу", translation: "Истинный", desc: "Тот, Чья сущность, атрибуты, слова и обещания являются абсолютной истиной" },
@@ -535,12 +593,12 @@
   { num: 37, name: "Аль-Матиину", translation: "Крепкий", desc: "Несокрушимый Господь, Которого не постигает усталость и Чья сила не имеет предела" },
   { num: 38, name: "Аль-Хайю", translation: "Живой", desc: "Тот, Чья жизнь совершенна, вечна и не имеет ни начала, ни конца, в отличие от Его творений" },
   { num: 39, name: "Аль-Къайууму", translation: "Вседержитель", desc: "Самодостаточный Господь, поддерживающий жизнь всех созданий, которые нуждаются в Нем каждое мгновение" },
-  { num: 40, name: "Аль-‘Алийю", translation: "Возвышенный", desc: "Тот, Кто вознесся Своей сущностью над всем сущим и обладает абсолютной властью над судьбами" },
-  { num: 41, name: "Аль-‘Азыыму", translation: "Великий", desc: "Тот, Чьё величие безгранично, и ни одно творение не способно возвеличить Его должным образом" },
+  { num: 40, name: "Аль-'Алийю", translation: "Возвышенный", desc: "Тот, Кто вознесся Своей сущностью над всем сущим и обладает абсолютной властью над судьбами" },
+  { num: 41, name: "Аль-'Азыыму", translation: "Великий", desc: "Тот, Чьё величие безгранично, и ни одно творение не способно возвеличить Его должным образом" },
   { num: 42, name: "Аш-Шакууру", translation: "Благодарный", desc: "Тот, Кто вознаграждает рабов за малые дела огромными благами, превосходящими их заслуги" },
   { num: 43, name: "Аль-Халииму", translation: "Сдержанный", desc: "Тот, Кто не спешит наказывать грешников и неверующих, предоставляя им отсрочку для покаяния" },
-  { num: 44, name: "Аль-Вааси’у", translation: "Объемлющий", desc: "Тот, Кто охватил всё сущее знанием и силой, Чьи владения и милость не имеют границ" },
-  { num: 45, name: "Аль-‘Алииму", translation: "Знающий", desc: "Тот, Чьё знание охватило всё зримое и незримое, тайное и явное на земле и на небесах" },
+  { num: 44, name: "Аль-Вааси'у", translation: "Объемлющий", desc: "Тот, Кто охватил всё сущее знанием и силой, Чьи владения и милость не имеют границ" },
+  { num: 45, name: "Аль-'Алииму", translation: "Знающий", desc: "Тот, Чьё знание охватило всё зримое и незримое, тайное и явное на земле и на небесах" },
   { num: 46, name: "Ат-Тавваабу", translation: "Принимающий покаяние", desc: "Тот, Кто внушает рабу раскаяние и прощает грехи, какими бы большими они ни были" },
   { num: 47, name: "Аль-Хакииму", translation: "Мудрый", desc: "Тот, Кто обладает абсолютной мудростью и управляет миром в совершенстве" },
   { num: 48, name: "Аль-Ганиийю", translation: "Богатый", desc: "Абсолютно ни в ком не нуждающийся Господь, Чья самодостаточность является Его атрибутом" },
@@ -561,7 +619,7 @@
   { num: 63, name: "Аль-Муаххыру", translation: "Отодвигающий назад", desc: "Тот, Кто по Своей воле и знанию откладывает события или отбрасывает назад грешников" },
   { num: 64, name: "Аль-Малиику", translation: "Властелин", desc: "Единственный Царь и Управитель, Чья власть абсолютна и в Ком нуждаются абсолютно все" },
   { num: 65, name: "Аль-Мукътадиру", translation: "Предопределяющий", desc: "Тот, Кто предопределяет всё Своим знанием и приводит в исполнение Своей силой" },
-  { num: 66, name: "Аль-Муса‘иру", translation: "Устанавливающий цену", desc: "Тот, Кто управляет уделом рабов и ценами, распределяя блага без несправедливости" },
+  { num: 66, name: "Аль-Муса'иру", translation: "Устанавливающий цену", desc: "Тот, Кто управляет уделом рабов и ценами, распределяя блага без несправедливости" },
   { num: 67, name: "Аль-Къаабиду", translation: "Удерживающий", desc: "Тот, Кто забирает души в срок и по мудрости удерживает удел рабов" },
   { num: 68, name: "Аль-Бааситу", translation: "Простирающий", desc: "Тот, Кто щедро наделяет пропитанием и протягивает руку для принятия покаяния" },
   { num: 69, name: "Ар-Раазикъу", translation: "Кормилец", desc: "Тот, Кто наделяет пропитанием каждое живое существо, распределяя удел мудро" },
@@ -579,7 +637,7 @@
   { num: 81, name: "Аль-Хасиибу", translation: "Достаточный", desc: "Тот, Кто удовлетворяет все нужды рабов и ведет точный счет их деяниям" },
   { num: 82, name: "Аш-Шаафийю", translation: "Исцеляющий", desc: "Тот, Кто избавляет от телесных недугов, душевных пороков и сомнений" },
   { num: 83, name: "Ар-Рафиикъу", translation: "Мягкий", desc: "Добрый Господь, Который любит мягкость и помогает Своим созданиям в беде" },
-  { num: 84, name: "Аль-Му‘тыы", translation: "Одаряющий", desc: "Тот, Кто наделяет рабов верой, знанием религии и всеми духовными благами" },
+  { num: 84, name: "Аль-Му'тыы", translation: "Одаряющий", desc: "Тот, Кто наделяет рабов верой, знанием религии и всеми духовными благами" },
   { num: 85, name: "Аль-Мукъыыту", translation: "Дарующий пропитание", desc: "Тот, Кто обеспечивает существование всех созданий и наблюдает за ними" },
   { num: 86, name: "Ас-Сейиду", translation: "Господин", desc: "Господин, Чье господство и правление полноценны и лишены любых изъянов" },
   { num: 87, name: "АТ-ТОЙИБУ", translation: "Благой", desc: "Совершенный во всем Господь, Который принимает от рабов только благие дела и пищу" },
@@ -587,13 +645,13 @@
   { num: 90, name: "Аль-Акраму", translation: "Щедрейший", desc: "Тот, Чья доброта охватила всё сущее и Чье совершенство не имеет границ" },
   { num: 91, name: "Аль-Барру", translation: "Добродетельный", desc: "Тот, Кто одаряет Свои творения милостями и помогает им быть послушными" },
   { num: 92, name: "Аль-Гаффаару", translation: "Всепрощающий", desc: "Многопрощающий Господь, скрывающий грехи тех, кто кается и ищет Его довольства" },
-  { num: 93, name: "Ар-Ра’ууфу", translation: "Сострадательный", desc: "Тот, Чье сострадание объемлет всё сущее, предостерегая рабов от грехов ради их блага" },
+  { num: 93, name: "Ар-Ра'ууфу", translation: "Сострадательный", desc: "Тот, Чье сострадание объемлет всё сущее, предостерегая рабов от грехов ради их блага" },
   { num: 94, name: "Аль-Ваххаабу", translation: "Дарующий", desc: "Тот, Кто одаряет каждого взывающего, Чьи дары в вечной жизни превыше всего" },
   { num: 95, name: "Аль-Джаввааду", translation: "Щедрый", desc: "Тот, Кто с щедростью наделяет рабов благами даже без их просьб" },
   { num: 96, name: "Ас-Суббууху", translation: "Преславный", desc: "Тот, Кто пречист от любых недостатков, Кого восхваляют все на небесах и на земле" },
   { num: 97, name: "Аль-Ваарису", translation: "Наследующий", desc: "Тот, Кто унаследует абсолютно всё после конца этого мира, обладая вечной властью" },
   { num: 98, name: "Ар-Раббу", translation: "Господь", desc: "Творец и Управитель, Который заботится о Своих рабах и наставляет их на истинный путь" },
-  { num: 99, name: "Аль-А‘ля", translation: "Всевышний", desc: "Тот, Кто возвысился Своей сущностью над мирами и обладает абсолютной похвалой" },
+  { num: 99, name: "Аль-А'ля", translation: "Всевышний", desc: "Тот, Кто возвысился Своей сущностью над мирами и обладает абсолютной похвалой" },
   { num: 99, name: "Аль-Иляху", translation: "Бог", desc: "Единственный Бог, заслуживающий поклонения, Чье имя объединяет все совершенные атрибуты" }
 ];
 
@@ -604,6 +662,112 @@
         let currentQuestionIndex = 0;
         let quizScore = 0;
         let answeredQuestions = 0;
+
+        // Пагинация
+        let currentPage = 1;
+        let filteredNames = [...names];
+
+        function getPageSize() {
+            return window.innerWidth <= 768 ? 5 : 10;
+        }
+
+        function getTotalPages() {
+            return Math.ceil(filteredNames.length / getPageSize());
+        }
+
+        function getCurrentPageNames() {
+            const pageSize = getPageSize();
+            const start = (currentPage - 1) * pageSize;
+            return filteredNames.slice(start, start + pageSize);
+        }
+
+        function renderPagination() {
+            const total = getTotalPages();
+            const pageSize = getPageSize();
+            const startItem = (currentPage - 1) * pageSize + 1;
+            const endItem = Math.min(currentPage * pageSize, filteredNames.length);
+
+            // Инфо
+            const info = document.getElementById('paginationInfo');
+            if (filteredNames.length > 0) {
+                info.textContent = `Показаны ${startItem}–${endItem} из ${filteredNames.length}`;
+            } else {
+                info.textContent = 'Ничего не найдено';
+            }
+
+            // Верхняя и нижняя пагинация
+            ['paginationTop', 'paginationBottom'].forEach(id => {
+                const container = document.getElementById(id);
+                container.innerHTML = '';
+
+                if (total <= 1) return;
+
+                // Кнопка «Назад»
+                const prevBtn = document.createElement('button');
+                prevBtn.className = 'pagination-btn';
+                prevBtn.textContent = '←';
+                prevBtn.disabled = currentPage === 1;
+                prevBtn.onclick = () => goToPage(currentPage - 1);
+                container.appendChild(prevBtn);
+
+                // Номера страниц
+                const pageNumbers = getPageNumbers(currentPage, total);
+                pageNumbers.forEach(p => {
+                    if (p === '…') {
+                        const dots = document.createElement('span');
+                        dots.textContent = '…';
+                        dots.style.cssText = 'padding: 0 4px; color: var(--text-light); line-height: 42px;';
+                        container.appendChild(dots);
+                    } else {
+                        const btn = document.createElement('button');
+                        btn.className = 'pagination-btn' + (p === currentPage ? ' active' : '');
+                        btn.textContent = p;
+                        btn.onclick = () => goToPage(p);
+                        container.appendChild(btn);
+                    }
+                });
+
+                // Кнопка «Вперёд»
+                const nextBtn = document.createElement('button');
+                nextBtn.className = 'pagination-btn';
+                nextBtn.textContent = '→';
+                nextBtn.disabled = currentPage === total;
+                nextBtn.onclick = () => goToPage(currentPage + 1);
+                container.appendChild(nextBtn);
+            });
+        }
+
+        function getPageNumbers(current, total) {
+            if (total <= 7) {
+                return Array.from({ length: total }, (_, i) => i + 1);
+            }
+            const pages = [];
+            if (current <= 4) {
+                for (let i = 1; i <= 5; i++) pages.push(i);
+                pages.push('…');
+                pages.push(total);
+            } else if (current >= total - 3) {
+                pages.push(1);
+                pages.push('…');
+                for (let i = total - 4; i <= total; i++) pages.push(i);
+            } else {
+                pages.push(1);
+                pages.push('…');
+                for (let i = current - 1; i <= current + 1; i++) pages.push(i);
+                pages.push('…');
+                pages.push(total);
+            }
+            return pages;
+        }
+
+        function goToPage(page) {
+            const total = getTotalPages();
+            if (page < 1 || page > total) return;
+            currentPage = page;
+            renderCards();
+            renderPagination();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
 
         function createCard(nameData, index) {
             const wrapper = document.createElement('div');
@@ -655,22 +819,29 @@
             document.getElementById('progressFill').style.width = `${percentage}%`;
         }
 
-        function renderCards(cardsToRender = names) {
+        function renderCards() {
             const grid = document.getElementById('cardsGrid');
             grid.innerHTML = '';
             allCards = [];
-            cardsToRender.forEach((nameData, index) => {
+            const pageNames = getCurrentPageNames();
+            pageNames.forEach((nameData, index) => {
                 grid.appendChild(createCard(nameData, index));
             });
         }
 
         function filterCards(searchTerm) {
-            const filtered = names.filter(name => 
-                name.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                name.translation.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                name.desc.toLowerCase().includes(searchTerm.toLowerCase())
-            );
-            renderCards(filtered);
+            if (searchTerm.trim() === '') {
+                filteredNames = [...names];
+            } else {
+                filteredNames = names.filter(name =>
+                    name.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    name.translation.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    name.desc.toLowerCase().includes(searchTerm.toLowerCase())
+                );
+            }
+            currentPage = 1;
+            renderCards();
+            renderPagination();
         }
 
         function generateQuizQuestions() {
@@ -814,7 +985,20 @@
 
         document.getElementById('quizNextBtn').addEventListener('click', nextQuestion);
 
+        // Обновление пагинации при изменении размера экрана
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                currentPage = 1;
+                renderCards();
+                renderPagination();
+            }, 200);
+        });
+
+        // Инициализация
         renderCards();
+        renderPagination();
         updateProgress();
     </script>
 </body>
