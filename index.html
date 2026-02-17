@@ -681,13 +681,25 @@
             return filteredNames.slice(start, start + pageSize);
         }
 
+        function addPageHandler(btn, targetPage) {
+            let touchHandled = false;
+            btn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                touchHandled = true;
+                goToPage(targetPage);
+            }, { passive: false });
+            btn.addEventListener('click', () => {
+                if (!touchHandled) goToPage(targetPage);
+                touchHandled = false;
+            });
+        }
+
         function renderPagination() {
             const total = getTotalPages();
             const pageSize = getPageSize();
             const startItem = (currentPage - 1) * pageSize + 1;
             const endItem = Math.min(currentPage * pageSize, filteredNames.length);
 
-            // Инфо
             const info = document.getElementById('paginationInfo');
             if (filteredNames.length > 0) {
                 info.textContent = `Показаны ${startItem}–${endItem} из ${filteredNames.length}`;
@@ -695,22 +707,19 @@
                 info.textContent = 'Ничего не найдено';
             }
 
-            // Верхняя и нижняя пагинация
             ['paginationTop', 'paginationBottom'].forEach(id => {
                 const container = document.getElementById(id);
                 container.innerHTML = '';
 
                 if (total <= 1) return;
 
-                // Кнопка «Назад»
                 const prevBtn = document.createElement('button');
                 prevBtn.className = 'pagination-btn';
                 prevBtn.textContent = '←';
                 prevBtn.disabled = currentPage === 1;
-                prevBtn.onclick = () => goToPage(currentPage - 1);
+                if (currentPage > 1) addPageHandler(prevBtn, currentPage - 1);
                 container.appendChild(prevBtn);
 
-                // Номера страниц
                 const pageNumbers = getPageNumbers(currentPage, total);
                 pageNumbers.forEach(p => {
                     if (p === '…') {
@@ -722,17 +731,16 @@
                         const btn = document.createElement('button');
                         btn.className = 'pagination-btn' + (p === currentPage ? ' active' : '');
                         btn.textContent = p;
-                        btn.onclick = () => goToPage(p);
+                        if (p !== currentPage) addPageHandler(btn, p);
                         container.appendChild(btn);
                     }
                 });
 
-                // Кнопка «Вперёд»
                 const nextBtn = document.createElement('button');
                 nextBtn.className = 'pagination-btn';
                 nextBtn.textContent = '→';
                 nextBtn.disabled = currentPage === total;
-                nextBtn.onclick = () => goToPage(currentPage + 1);
+                if (currentPage < total) addPageHandler(nextBtn, currentPage + 1);
                 container.appendChild(nextBtn);
             });
         }
@@ -764,9 +772,13 @@
             const total = getTotalPages();
             if (page < 1 || page > total) return;
             currentPage = page;
-            renderCards();
-            renderPagination();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            // setTimeout выносит ре-рендер за пределы текущего события клика/тапа,
+            // иначе на iOS пересоздание DOM во время тапа вызывает повторный триггер
+            setTimeout(() => {
+                renderCards();
+                renderPagination();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 0);
         }
 
         function createCard(nameData, index) {
