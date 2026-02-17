@@ -681,16 +681,15 @@
             return filteredNames.slice(start, start + pageSize);
         }
 
+        let isNavigating = false;
+
         function addPageHandler(btn, targetPage) {
-            let touchHandled = false;
-            btn.addEventListener('touchend', (e) => {
-                e.preventDefault();
-                touchHandled = true;
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (isNavigating) return;
+                isNavigating = true;
                 goToPage(targetPage);
-            }, { passive: false });
-            btn.addEventListener('click', () => {
-                if (!touchHandled) goToPage(targetPage);
-                touchHandled = false;
+                setTimeout(() => { isNavigating = false; }, 400);
             });
         }
 
@@ -772,13 +771,9 @@
             const total = getTotalPages();
             if (page < 1 || page > total) return;
             currentPage = page;
-            // setTimeout выносит ре-рендер за пределы текущего события клика/тапа,
-            // иначе на iOS пересоздание DOM во время тапа вызывает повторный триггер
-            setTimeout(() => {
-                renderCards();
-                renderPagination();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }, 0);
+            renderCards();
+            renderPagination();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function createCard(nameData, index) {
