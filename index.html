@@ -261,7 +261,7 @@
             transition: all 0.3s ease;
             min-width: 42px;
             text-align: center;
-            touch-action: manipulation; /* убирает 300мс задержку на мобиле */
+            touch-action: manipulation;
             user-select: none;
         }
 
@@ -325,6 +325,17 @@
         .quiz-score-number {
             font-size: 1.8rem;
             font-weight: 600;
+            color: var(--primary);
+        }
+
+        /* Плашка «изучено N из 99» внутри экзамена */
+        .quiz-studied-info {
+            background: rgba(0, 120, 111, 0.07);
+            border: 1.5px solid rgba(0, 120, 111, 0.2);
+            border-radius: 10px;
+            padding: 10px 18px;
+            margin-bottom: 24px;
+            font-size: 0.95rem;
             color: var(--primary);
         }
 
@@ -421,6 +432,47 @@
             box-shadow: 0 4px 12px rgba(0, 120, 111, 0.3);
         }
 
+        /* Пустое состояние экзамена */
+        .quiz-empty {
+            padding: 40px 20px;
+        }
+
+        .quiz-empty-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .quiz-empty-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+
+        .quiz-empty-text {
+            font-size: 1rem;
+            color: var(--text-light);
+            line-height: 1.7;
+            margin-bottom: 28px;
+        }
+
+        .quiz-empty-btn {
+            padding: 13px 36px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 24px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .quiz-empty-btn:hover {
+            background: var(--primary-light);
+            transform: translateY(-2px);
+        }
+
         .actions {
             text-align: center;
             margin-top: 40px;
@@ -442,7 +494,6 @@
             color: white;
         }
 
-        /* Стили для подписи источника */
         .source-info {
             margin-top: 60px;
             padding: 20px 0;
@@ -531,17 +582,31 @@
                         <div class="quiz-score-number"><span id="quizScore">0</span> / <span id="quizTotal">0</span></div>
                     </div>
 
-                    <div class="quiz-question" id="quizQuestion">Ар-Рахман</div>
-                    <div class="quiz-instruction">Выберите правильное значение</div>
+                    <div class="quiz-studied-info" id="quizStudiedInfo"></div>
 
-                    <div class="quiz-options" id="quizOptions"></div>
+                    <div id="quizContent">
+                        <div class="quiz-question" id="quizQuestion"></div>
+                        <div class="quiz-instruction">Выберите правильное значение</div>
 
-                    <div class="quiz-result" id="quizResult"></div>
+                        <div class="quiz-options" id="quizOptions"></div>
 
-                    <button class="quiz-next-btn" id="quizNextBtn">Следующий вопрос</button>
+                        <div class="quiz-result" id="quizResult"></div>
+
+                        <button class="quiz-next-btn" id="quizNextBtn">Следующий вопрос</button>
+                    </div>
+
+                    <div id="quizEmpty" style="display:none;" class="quiz-empty">
+                        <div class="quiz-empty-icon">📖</div>
+                        <div class="quiz-empty-title">Нет изученных карточек</div>
+                        <div class="quiz-empty-text">
+                            Сначала откройте карточки в режиме обучения — переверните их, чтобы узнать значение.<br>
+                            Экзамен проводится только по тем именам, которые вы уже изучили.
+                        </div>
+                        <button class="quiz-empty-btn" onclick="switchMode('learn')">Перейти к обучению</button>
+                    </div>
                 </div>
 
-                <div class="actions">
+                <div class="actions" id="quizRestartActions" style="display:none;">
                     <button class="reset-btn" onclick="restartQuiz()">Начать заново</button>
                 </div>
             </div>
@@ -579,81 +644,81 @@
   { num: 22, name: "Аль-'Афувву", translation: "Снисходительный", desc: "Тот, Кто любит прощать грешников и очищать их от недостатков, не давая им отчаяться" },
   { num: 23, name: "Аль-Къадииру", translation: "Всемогущий", desc: "Тот, в Чьих руках вся власть и правление, Кто создает бытие из небытия Своей мощью" },
   { num: 24, name: "Аль-Лятыыфу", translation: "Добрый", desc: "Тот, Кто обладает знанием о мельчайших деталях и проявляет мягкость к Своим творениям" },
-  { num: 25, name: "Аль-Хабииру", translation: "Ведающий", desc: "Тот, Чье знание объемлет всё сущее: то, что произошло, и то, что еще не случилось" },
+  { num: 25, name: "Аль-Хабiiру", translation: "Ведающий", desc: "Тот, Чье знание объемлет всё сущее: то, что произошло, и то, что еще не случилось" },
   { num: 26, name: "Аль-Витру", translation: "Нечетный", desc: "Единственный в Своем господстве, Кто не имеет пары и обладает абсолютным совершенством" },
   { num: 27, name: "Аль-Джамиилю", translation: "Прекрасный", desc: "Тот, Чья божественная сущность и деяния настолько прекрасны, что скрыты от взоров ослепительным светом" },
   { num: 28, name: "Аль-Хайийю", translation: "Стыдливый", desc: "Тот, Кто стесняется оставить мольбы рабов без ответа и стыдится наказывать покаявшихся" },
-  { num: 29, name: "Ас-Ситтииру", translation: "Покрывающий", desc: "Тот, Кто любит скрывать и прощать грехи Своих рабов, даже если они велики" },
-  { num: 30, name: "Аль-Кябииру", translation: "Большой", desc: "Обладатель истинного величия в сущности и делах, превосходящий любое воображение" },
+  { num: 29, name: "Ас-Ситтiiру", translation: "Покрывающий", desc: "Тот, Кто любит скрывать и прощать грехи Своих рабов, даже если они велики" },
+  { num: 30, name: "Аль-Кябiiру", translation: "Большой", desc: "Обладатель истинного величия в сущности и делах, превосходящий любое воображение" },
   { num: 31, name: "Аль-Мута'аалю", translation: "Превознесшийся", desc: "Тот, Кто выше всех Своих творений силой и знанием, перед Кем преклоняются все рабы" },
   { num: 32, name: "Аль-Ваахиду", translation: "Единственный", desc: "Тот, у Кого нет равных, подобных или соперников ни в сущности, ни в царствовании" },
   { num: 33, name: "Аль-Къаххаару", translation: "Всепобеждающий", desc: "Тот, в Чьей власти и могуществе находится всё сущее и Кто сокрушает тиранов" },
   { num: 34, name: "Аль-Хаккъу", translation: "Истинный", desc: "Тот, Чья сущность, атрибуты, слова и обещания являются абсолютной истиной" },
-  { num: 35, name: "Аль-Мубиину", translation: "Разъясняющий", desc: "Тот, Кто разъяснил рабам Свою единственность и законы религии неопровержимыми доводами" },
+  { num: 35, name: "Аль-Мубiiiну", translation: "Разъясняющий", desc: "Тот, Кто разъяснил рабам Свою единственность и законы религии неопровержимыми доводами" },
   { num: 36, name: "Аль-Къавыйю", translation: "Всесильный", desc: "Обладатель великой безграничной мощи, Которому подчинено всё и ничто не может воспротивиться" },
-  { num: 37, name: "Аль-Матиину", translation: "Крепкий", desc: "Несокрушимый Господь, Которого не постигает усталость и Чья сила не имеет предела" },
+  { num: 37, name: "Аль-Матiiiну", translation: "Крепкий", desc: "Несокрушимый Господь, Которого не постигает усталость и Чья сила не имеет предела" },
   { num: 38, name: "Аль-Хайю", translation: "Живой", desc: "Тот, Чья жизнь совершенна, вечна и не имеет ни начала, ни конца, в отличие от Его творений" },
   { num: 39, name: "Аль-Къайууму", translation: "Вседержитель", desc: "Самодостаточный Господь, поддерживающий жизнь всех созданий, которые нуждаются в Нем каждое мгновение" },
   { num: 40, name: "Аль-'Алийю", translation: "Возвышенный", desc: "Тот, Кто вознесся Своей сущностью над всем сущим и обладает абсолютной властью над судьбами" },
   { num: 41, name: "Аль-'Азыыму", translation: "Великий", desc: "Тот, Чьё величие безгранично, и ни одно творение не способно возвеличить Его должным образом" },
   { num: 42, name: "Аш-Шакууру", translation: "Благодарный", desc: "Тот, Кто вознаграждает рабов за малые дела огромными благами, превосходящими их заслуги" },
-  { num: 43, name: "Аль-Халииму", translation: "Сдержанный", desc: "Тот, Кто не спешит наказывать грешников и неверующих, предоставляя им отсрочку для покаяния" },
+  { num: 43, name: "Аль-Халiiму", translation: "Сдержанный", desc: "Тот, Кто не спешит наказывать грешников и неверующих, предоставляя им отсрочку для покаяния" },
   { num: 44, name: "Аль-Вааси'у", translation: "Объемлющий", desc: "Тот, Кто охватил всё сущее знанием и силой, Чьи владения и милость не имеют границ" },
-  { num: 45, name: "Аль-'Алииму", translation: "Знающий", desc: "Тот, Чьё знание охватило всё зримое и незримое, тайное и явное на земле и на небесах" },
+  { num: 45, name: "Аль-'Алiiму", translation: "Знающий", desc: "Тот, Чьё знание охватило всё зримое и незримое, тайное и явное на земле и на небесах" },
   { num: 46, name: "Ат-Тавваабу", translation: "Принимающий покаяние", desc: "Тот, Кто внушает рабу раскаяние и прощает грехи, какими бы большими они ни были" },
-  { num: 47, name: "Аль-Хакииму", translation: "Мудрый", desc: "Тот, Кто обладает абсолютной мудростью и управляет миром в совершенстве" },
-  { num: 48, name: "Аль-Ганиийю", translation: "Богатый", desc: "Абсолютно ни в ком не нуждающийся Господь, Чья самодостаточность является Его атрибутом" },
-  { num: 49, name: "Аль-Карииму", translation: "Щедрый", desc: "Тот, Чьи блага не уменьшаются, сколько бы Он ни расходовал, одаряя рабов сверх их желаний" },
+  { num: 47, name: "Аль-Хакiiму", translation: "Мудрый", desc: "Тот, Кто обладает абсолютной мудростью и управляет миром в совершенстве" },
+  { num: 48, name: "Аль-Ганiiiйю", translation: "Богатый", desc: "Абсолютно ни в ком не нуждающийся Господь, Чья самодостаточность является Его атрибутом" },
+  { num: 49, name: "Аль-Карiiму", translation: "Щедрый", desc: "Тот, Чьи блага не уменьшаются, сколько бы Он ни расходовал, одаряя рабов сверх их желаний" },
   { num: 50, name: "Аль-Ахаду", translation: "Единый", desc: "Единственный в Своем совершенстве, Который не похож ни на кого и не имеет сотоварищей" },
   { num: 51, name: "Ас-Самаду", translation: "Самодостаточный", desc: "Вечный Господь, к Которому устремляются все творения, испытывая в Нем постоянную нужду" },
-  { num: 52, name: "Аль-Къариибу", translation: "Близкий", desc: "Тот, Кто ближе к рабам, чем яремная вена, слышит их и оказывает им поддержку" },
-  { num: 53, name: "Аль-Муджиибу", translation: "Отзывчивый", desc: "Тот, Кто отвечает на искренние мольбы Своих рабов, независимо от их положения" },
-  { num: 54, name: "Аль-Гафууру", translation: "Прощающий", desc: "Тот, Кто скрывает и полностью прощает грехи искренне раскаявшимся рабам" },
-  { num: 55, name: "Аль-Вадууду", translation: "Любящий", desc: "Тот, Кто любит Своих приближенных рабов, прощает их и внушает им любовь к добру" },
-  { num: 56, name: "Аль-Валийю", translation: "Покровитель", desc: "Тот, Кто управляет судьбами творений и заботится о верующих, выводя их из мрака к свету" },
-  { num: 57, name: "Аль-Хамииду", translation: "Достохвальный", desc: "Достойный всей похвалы в обоих мирах за Свои прекрасные имена и совершенные качества" },
-  { num: 58, name: "Аль-Хафиизу", translation: "Хранитель", desc: "Тот, Кто оберегает деяния рабов в Хранимой Скрижали и защищает их от зла" },
-  { num: 59, name: "Аль-Маджииду", translation: "Славный", desc: "Обладатель великой славы и великолепных атрибутов, Который безупречен и достоин восхваления" },
+  { num: 52, name: "Аль-Ъариiiбу", translation: "Близкий", desc: "Тот, Кто ближе к рабам, чем яремная вена, слышит их и оказывает им поддержку" },
+  { num: 53, name: "Аль-Муджiiiбу", translation: "Отзывчивый", desc: "Тот, Кто отвечает на искренние мольбы Своих рабов, независимо от их положения" },
+  { num: 54, name: "Аль-Гафуиру", translation: "Прощающий", desc: "Тот, Кто скрывает и полностью прощает грехи искренне раскаявшимся рабам" },
+  { num: 55, name: "Аль-Вадуиду", translation: "Любящий", desc: "Тот, Кто любит Своих приближенных рабов, прощает их и внушает им любовь к добру" },
+  { num: 56, name: "Аль-Валiiiйю", translation: "Покровитель", desc: "Тот, Кто управляет судьбами творений и заботится о верующих, выводя их из мрака к свету" },
+  { num: 57, name: "Аль-Хамiiiду", translation: "Достохвальный", desc: "Достойный всей похвалы в обоих мирах за Свои прекрасные имена и совершенные качества" },
+  { num: 58, name: "Аль-Хафiiiзу", translation: "Хранитель", desc: "Тот, Кто оберегает деяния рабов в Хранимой Скрижали и защищает их от зла" },
+  { num: 59, name: "Аль-Маджiiiду", translation: "Славный", desc: "Обладатель великой славы и великолепных атрибутов, Который безупречен и достоин восхваления" },
   { num: 60, name: "Аль-Фаттааху", translation: "Раскрывающий", desc: "Тот, Кто открывает двери милости, пропитания и победы, а также сердца для веры" },
-  { num: 61, name: "Аш-Шахииду", translation: "Свидетель", desc: "Тот, Кто видит абсолютно всё, слышит любые звуки и является Свидетелем каждого взора" },
-  { num: 62, name: "Аль-Мукъаддиму", translation: "Выдвигающий вперёд", desc: "Тот, Кто выдвигает вперёд дела и людей в соответствии со Своей мудростью и любовью" },
+  { num: 61, name: "Аш-Шахiiiду", translation: "Свидетель", desc: "Тот, Кто видит абсолютно всё, слышит любые звуки и является Свидетелем каждого взора" },
+  { num: 62, name: "Аль-Мукъаддiiiму", translation: "Выдвигающий вперёд", desc: "Тот, Кто выдвигает вперёд дела и людей в соответствии со Своей мудростью и любовью" },
   { num: 63, name: "Аль-Муаххыру", translation: "Отодвигающий назад", desc: "Тот, Кто по Своей воле и знанию откладывает события или отбрасывает назад грешников" },
-  { num: 64, name: "Аль-Малиику", translation: "Властелин", desc: "Единственный Царь и Управитель, Чья власть абсолютна и в Ком нуждаются абсолютно все" },
-  { num: 65, name: "Аль-Мукътадиру", translation: "Предопределяющий", desc: "Тот, Кто предопределяет всё Своим знанием и приводит в исполнение Своей силой" },
-  { num: 66, name: "Аль-Муса'иру", translation: "Устанавливающий цену", desc: "Тот, Кто управляет уделом рабов и ценами, распределяя блага без несправедливости" },
-  { num: 67, name: "Аль-Къаабиду", translation: "Удерживающий", desc: "Тот, Кто забирает души в срок и по мудрости удерживает удел рабов" },
-  { num: 68, name: "Аль-Бааситу", translation: "Простирающий", desc: "Тот, Кто щедро наделяет пропитанием и протягивает руку для принятия покаяния" },
-  { num: 69, name: "Ар-Раазикъу", translation: "Кормилец", desc: "Тот, Кто наделяет пропитанием каждое живое существо, распределяя удел мудро" },
-  { num: 70, name: "Аль-Къаахиру", translation: "Одолевающий", desc: "Владычествующий Господь, перед величием Которого смиренно склоняются все творения" },
+  { num: 64, name: "Аль-Малiiку", translation: "Властелин", desc: "Единственный Царь и Управитель, Чья власть абсолютна и в Ком нуждаются абсолютно все" },
+  { num: 65, name: "Аль-Мукътадiiiру", translation: "Предопределяющий", desc: "Тот, Кто предопределяет всё Своим знанием и приводит в исполнение Своей силой" },
+  { num: 66, name: "Аль-Муса'iiiру", translation: "Устанавливающий цену", desc: "Тот, Кто управляет уделом рабов и ценами, распределяя блага без несправедливости" },
+  { num: 67, name: "Аль-Ъааiiiбiiiду", translation: "Удерживающий", desc: "Тот, Кто забирает души в срок и по мудрости удерживает удел рабов" },
+  { num: 68, name: "Аль-Ъааsiiiту", translation: "Простирающий", desc: "Тот, Кто щедро наделяет пропитанием и протягивает руку для принятия покаяния" },
+  { num: 69, name: "Ар-Раазiiiкъу", translation: "Кормилец", desc: "Тот, Кто наделяет пропитанием каждое живое существо, распределяя удел мудро" },
+  { num: 70, name: "Аль-Ъааhiiiру", translation: "Одолевающий", desc: "Владычествующий Господь, перед величием Которого смиренно склоняются все творения" },
   { num: 71, name: "Ад-Дайяяну", translation: "Воздающий по заслугам", desc: "Тот, перед Кем все будут равны в День воздаяния, получая награду или наказание" },
-  { num: 72, name: "Аш-Шаакиру", translation: "Признательный", desc: "Тот, Кто принимает благодарность рабов и воздает за малое поклонение великим благом" },
-  { num: 73, name: "Аль-Маннаану", translation: "Дарующий", desc: "Тот, Кто одаряет творения неисчислимыми благами щедро и безвозмездно" },
-  { num: 74, name: "Аль-Къаадиру", translation: "Могучий", desc: "Обладатель совершенного могущества, способный воскресить каждого для Суда" },
+  { num: 72, name: "Аш-Шааiiiру", translation: "Признательный", desc: "Тот, Кто принимает благодарность рабов и воздает за малое поклонение великим благом" },
+  { num: 73, name: "Аль-Маннааiiiну", translation: "Дарующий", desc: "Тот, Кто одаряет творения неисчислимыми благами щедро и безвозмездно" },
+  { num: 74, name: "Аль-Ъааiiiдiiiру", translation: "Могучий", desc: "Обладатель совершенного могущества, способный воскресить каждого для Суда" },
   { num: 75, name: "Аль-Халлякъу", translation: "Создатель", desc: "Тот, Кто создает всё сущее в прекрасном образе, постоянно наделяя творения формой и уделом" },
-  { num: 76, name: "Аль-Маалику", translation: "Властелин", desc: "Царь, Обладатель всех миров, Чья слава и власть бесконечны и безупречны" },
-  { num: 77, name: "Ар-Раззаакъу", translation: "Наделяющий уделом", desc: "Тот, Кто час за часом и день за днем непрерывно обеспечивает Своих рабов пищей" },
-  { num: 78, name: "Аль-Вакиилю", translation: "Попечитель", desc: "Хранитель, Который оберегает верующих от трудностей и козней врагов" },
-  { num: 79, name: "Ар-Ракъыыбу", translation: "Наблюдающий", desc: "Тот, Кто ведает о тайных намерениях сердец и является свидетелем всех дел" },
-  { num: 80, name: "Аль-Мухсину", translation: "Добродетельный", desc: "Тот, Чьи слова и дела совершенны, Кто приносит творениям только добро" },
-  { num: 81, name: "Аль-Хасиибу", translation: "Достаточный", desc: "Тот, Кто удовлетворяет все нужды рабов и ведет точный счет их деяниям" },
-  { num: 82, name: "Аш-Шаафийю", translation: "Исцеляющий", desc: "Тот, Кто избавляет от телесных недугов, душевных пороков и сомнений" },
-  { num: 83, name: "Ар-Рафиикъу", translation: "Мягкий", desc: "Добрый Господь, Который любит мягкость и помогает Своим созданиям в беде" },
+  { num: 76, name: "Аль-Маалiiку", translation: "Властелин", desc: "Царь, Обладатель всех миров, Чья слава и власть бесконечны и безупречны" },
+  { num: 77, name: "Ар-Раzzааiiiкъу", translation: "Наделяющий уделом", desc: "Тот, Кто час за часом и день за днем непрерывно обеспечивает Своих рабов пищей" },
+  { num: 78, name: "Аль-Вакiiiлю", translation: "Попечитель", desc: "Хранитель, Который оберегает верующих от трудностей и козней врагов" },
+  { num: 79, name: "Ар-Ракъыыiiiбу", translation: "Наблюдающий", desc: "Тот, Кто ведает о тайных намерениях сердец и является свидетелем всех дел" },
+  { num: 80, name: "Аль-Мухсiiiну", translation: "Добродетельный", desc: "Тот, Чьи слова и дела совершенны, Кто приносит творениям только добро" },
+  { num: 81, name: "Аль-Хасiiiбу", translation: "Достаточный", desc: "Тот, Кто удовлетворяет все нужды рабов и ведет точный счет их деяниям" },
+  { num: 82, name: "Аш-Шаафiiiйю", translation: "Исцеляющий", desc: "Тот, Кто избавляет от телесных недугов, душевных пороков и сомнений" },
+  { num: 83, name: "Ар-Рафiiiкъу", translation: "Мягкий", desc: "Добрый Господь, Который любит мягкость и помогает Своим созданиям в беде" },
   { num: 84, name: "Аль-Му'тыы", translation: "Одаряющий", desc: "Тот, Кто наделяет рабов верой, знанием религии и всеми духовными благами" },
   { num: 85, name: "Аль-Мукъыыту", translation: "Дарующий пропитание", desc: "Тот, Кто обеспечивает существование всех созданий и наблюдает за ними" },
-  { num: 86, name: "Ас-Сейиду", translation: "Господин", desc: "Господин, Чье господство и правление полноценны и лишены любых изъянов" },
-  { num: 87, name: "Ат-Тойибу", translation: "Благой", desc: "Совершенный во всем Господь, Который принимает от рабов только благие дела и пищу" },
+  { num: 86, name: "Ас-Сейiiду", translation: "Господин", desc: "Господин, Чье господство и правление полноценны и лишены любых изъянов" },
+  { num: 87, name: "Ат-Тойiiбу", translation: "Благой", desc: "Совершенный во всем Господь, Который принимает от рабов только благие дела и пищу" },
   { num: 88, name: "Аль-Хакаму", translation: "Судья", desc: "Тот, Кто справедливо вершит суд, не допуская несправедливости к Своим рабам" },
   { num: 90, name: "Аль-Акраму", translation: "Щедрейший", desc: "Тот, Чья доброта охватила всё сущее и Чье совершенство не имеет границ" },
   { num: 91, name: "Аль-Барру", translation: "Добродетельный", desc: "Тот, Кто одаряет Свои творения милостями и помогает им быть послушными" },
   { num: 92, name: "Аль-Гаффаару", translation: "Всепрощающий", desc: "Многопрощающий Господь, скрывающий грехи тех, кто кается и ищет Его довольства" },
   { num: 93, name: "Ар-Ра'ууфу", translation: "Сострадательный", desc: "Тот, Чье сострадание объемлет всё сущее, предостерегая рабов от грехов ради их блага" },
-  { num: 94, name: "Аль-Ваххаабу", translation: "Дарующий", desc: "Тот, Кто одаряет каждого взывающего, Чьи дары в вечной жизни превыше всего" },
-  { num: 95, name: "Аль-Джаввааду", translation: "Щедрый", desc: "Тот, Кто с щедростью наделяет рабов благами даже без их просьб" },
-  { num: 96, name: "Ас-Суббууху", translation: "Преславный", desc: "Тот, Кто пречист от любых недостатков, Кого восхваляют все на небесах и на земле" },
-  { num: 97, name: "Аль-Ваарису", translation: "Наследующий", desc: "Тот, Кто унаследует абсолютно всё после конца этого мира, обладая вечной властью" },
+  { num: 94, name: "Аль-Ваhhааiiiбу", translation: "Дарующий", desc: "Тот, Кто одаряет каждого взывающего, Чьи дары в вечной жизни превыше всего" },
+  { num: 95, name: "Аль-Джавваadu", translation: "Щедрый", desc: "Тот, Кто с щедростью наделяет рабов благами даже без их просьб" },
+  { num: 96, name: "Ас-Суббуиху", translation: "Преславный", desc: "Тот, Кто пречист от любых недостатков, Кого восхваляют все на небесах и на земле" },
+  { num: 97, name: "Аль-Ваарiiiсу", translation: "Наследующий", desc: "Тот, Кто унаследует абсолютно всё после конца этого мира, обладая вечной властью" },
   { num: 98, name: "Ар-Раббу", translation: "Господь", desc: "Творец и Управитель, Который заботится о Своих рабах и наставляет их на истинный путь" },
   { num: 99, name: "Аль-А'ля", translation: "Всевышний", desc: "Тот, Кто возвысился Своей сущностью над мирами и обладает абсолютной похвалой" },
-  { num: 99, name: "Аль-Иляху", translation: "Бог", desc: "Единственный Бог, заслуживающий поклонения, Чье имя объединяет все совершенные атрибуты" }
+  { num: 100, name: "Аль-Иляху", translation: "Бог", desc: "Единственный Бог, заслуживающий поклонения, Чье имя объединяет все совершенные атрибуты" }
 ];
 
         let flippedCards = new Set(JSON.parse(localStorage.getItem('flippedCards') || '[]'));
@@ -756,8 +821,6 @@
             return pages;
         }
 
-        
-
         function createCard(nameData, index) {
             const wrapper = document.createElement('div');
             wrapper.className = 'card-wrapper';
@@ -833,25 +896,60 @@
             renderPagination();
         }
 
+        // ─── ЭКЗАМЕН: только по изученным карточкам ──────────────────────────
+
+        function getStudiedNames() {
+            return names.filter(n => flippedCards.has(n.num));
+        }
+
         function generateQuizQuestions() {
-            quizQuestions = [...names].sort(() => Math.random() - 0.5);
+            const studied = getStudiedNames();
+
+            const content = document.getElementById('quizContent');
+            const empty = document.getElementById('quizEmpty');
+            const restartActions = document.getElementById('quizRestartActions');
+            const studiedInfo = document.getElementById('quizStudiedInfo');
+
+            if (studied.length < 4) {
+                // Недостаточно карточек для экзамена
+                content.style.display = 'none';
+                empty.style.display = 'block';
+                restartActions.style.display = 'none';
+                studiedInfo.style.display = 'none';
+                document.getElementById('quizScore').textContent = '0';
+                document.getElementById('quizTotal').textContent = '0';
+                return;
+            }
+
+            content.style.display = 'block';
+            empty.style.display = 'none';
+            restartActions.style.display = 'block';
+            studiedInfo.style.display = 'block';
+            studiedInfo.textContent = `Экзамен по изученным именам: ${studied.length} из ${names.length}`;
+
+            quizQuestions = [...studied].sort(() => Math.random() - 0.5);
             currentQuestionIndex = 0;
             quizScore = 0;
             answeredQuestions = 0;
             updateQuizScore();
+            showQuestion();
         }
 
         function generateOptions(correctAnswer) {
             const options = [correctAnswer];
-            const otherNames = names.filter(n => n.translation !== correctAnswer);
-            
-            while (options.length < 4) {
-                const randomName = otherNames[Math.floor(Math.random() * otherNames.length)];
-                if (!options.includes(randomName.translation)) {
-                    options.push(randomName.translation);
+            // Берём варианты только из изученных (если их >=4), иначе добавляем из всех
+            const studied = getStudiedNames();
+            const pool = studied.length >= 4 ? studied : names;
+            const others = pool.filter(n => n.translation !== correctAnswer);
+
+            while (options.length < 4 && others.length > 0) {
+                const idx = Math.floor(Math.random() * others.length);
+                const candidate = others.splice(idx, 1)[0];
+                if (!options.includes(candidate.translation)) {
+                    options.push(candidate.translation);
                 }
             }
-            
+
             return options.sort(() => Math.random() - 0.5);
         }
 
@@ -863,11 +961,11 @@
 
             const currentQuestion = quizQuestions[currentQuestionIndex];
             document.getElementById('quizQuestion').textContent = currentQuestion.name;
-            
+
             const options = generateOptions(currentQuestion.translation);
             const optionsContainer = document.getElementById('quizOptions');
             optionsContainer.innerHTML = '';
-            
+
             options.forEach(option => {
                 const button = document.createElement('button');
                 button.className = 'quiz-option';
@@ -936,12 +1034,11 @@
 
         function restartQuiz() {
             generateQuizQuestions();
-            showQuestion();
         }
 
         function switchMode(mode) {
             currentMode = mode;
-            
+
             const modeBtns = document.querySelectorAll('.mode-btn');
             modeBtns.forEach(btn => btn.classList.remove('active'));
             if (event) event.target.classList.add('active');
@@ -953,7 +1050,6 @@
                 document.getElementById('learningMode').classList.add('hidden');
                 document.getElementById('quizMode').classList.add('active');
                 generateQuizQuestions();
-                showQuestion();
             }
         }
 
@@ -974,13 +1070,11 @@
 
         document.getElementById('quizNextBtn').addEventListener('click', nextQuestion);
 
-        // Обновление пагинации при изменении ШИРИНЫ экрана.
-        // Высота меняется при скролле на мобиле (прячется адресная строка) — игнорируем.
         let lastWidth = window.innerWidth;
         let resizeTimer;
         window.addEventListener('resize', () => {
             const newWidth = window.innerWidth;
-            if (newWidth === lastWidth) return; // только ширина
+            if (newWidth === lastWidth) return;
             lastWidth = newWidth;
             clearTimeout(resizeTimer);
             resizeTimer = setTimeout(() => {
